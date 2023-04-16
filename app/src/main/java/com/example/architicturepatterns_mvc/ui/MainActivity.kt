@@ -6,35 +6,41 @@ import android.view.View
 import com.example.architicturepatterns_mvc.databinding.ActivityMainBinding
 import com.example.architicturepatterns_mvc.model.FakeApiService
 import com.example.architicturepatterns_mvc.model.FakeDatabase
+import com.example.architicturepatterns_mvc.model.domain.User
+import com.example.architicturepatterns_mvc.model.domain.Wisdom
+import com.example.architicturepatterns_mvc.presenter.MainPresenter
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), IMainView {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-    private val api = FakeApiService()
-    private val database = FakeDatabase()
+    private val presenter by lazy { MainPresenter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
+        setUp()
+        addCallBacks()
     }
 
-    fun updateView(v:View){
-        fetchAWisdom()
-        fetchUserInfo()
-    }
-
-    private fun fetchAWisdom() {
-        val result = api.getRandomWisdom()
-        binding.apply {
-            tvDate.text = result.date
-            tvContent.text = result.content
+    private fun addCallBacks() {
+        binding.button.setOnClickListener {
+            presenter.getWisdom()
         }
     }
 
-    private fun fetchUserInfo() {
-        val user = database.getCurrentUser()
+    private fun setUp() {
+        presenter.view = this
+        presenter.getUserName()
+    }
+
+    override fun onUserInfoSuccess(user: User) {
         binding.tvUserName.text = user.name
     }
+
+    override fun onWisdomSuccess(wisdom: Wisdom) {
+        binding.tvDate.text = wisdom.date
+        binding.tvContent.text = wisdom.content
+    }
+
 
 }
